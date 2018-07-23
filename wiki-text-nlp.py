@@ -7,6 +7,10 @@ import re
 
 RE_STRIP_REFS = re.compile("\.?\[\d+\]?")
 NLP = spacy.load('en_core_web_sm')
+REPLACE_VERBS = {
+    "being" : "was",
+    "to be" : "will be"
+}
 
 def cleanup(s):
     s = RE_STRIP_REFS.sub("", s).strip()
@@ -16,6 +20,12 @@ def cleanup(s):
         s = s[0:-1]
 
     return s
+
+def cleanup_verb(verb):
+    if verb in REPLACE_VERBS:
+        verb = REPLACE_VERBS[verb]
+
+    return verb
 
 def get_article_text(title):
     ENDPOINT = f"https://en.wikipedia.org/api/rest_v1/page/html/{title}"
@@ -42,6 +52,7 @@ def main():
     for statement in statements:
         subject, verb, fact = statement
         fact = cleanup(str(fact))
+        verb = cleanup_verb(str(verb))
         print(f"...{verb} {fact}?")
 
 if __name__ == "__main__":
